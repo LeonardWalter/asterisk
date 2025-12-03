@@ -298,9 +298,12 @@ struct ast_frame *ast_audiosocket_receive_frame_with_hangup(const int svc,
 	}
 
 	while (i < 3) {
-		n = read(svc, header, 3);
+		n = read(svc, header + i, 3 - i);
 		if (n == -1) {
 			if (errno == EAGAIN || errno == EWOULDBLOCK) {
+				if (i == 0) {
+					return &ast_null_frame;
+				}
 				int poll_result = ast_wait_for_input(svc, 5);
 
 				if (poll_result == 1) {
